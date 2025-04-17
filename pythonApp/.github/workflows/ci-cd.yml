@@ -1,0 +1,57 @@
+name: CI/CD Pipeline Python App
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE_NAME: python-app
+  VERSION_TAG: v${{ github.run_id }}
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image with version tag
+        run: |
+          docker build -t $IMAGE_NAME:${{ env.VERSION_TAG }} .
+
+  run_test:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Run container for testing
+        run: docker run -d -p 4000:5000 --name test_container $IMAGE_NAME:${{ env.VERSION_TAG }}
+
+      - name: Wait for app to be ready
+        run: sleep 5
+
+      - name: Test if service is up
+        run: |
+          curl -f http://localhost:4000 || (echo "Test failed!" && exit 1)
+
+  cleanup:
+    runs-on: self-hosted
+    needs: run_test
+    if: always()
+    steps:
+      - name: Stop and remove test container
+        run: |
+          docker stop test_container || true
+          docker rm test_container || true
+
+      - name: Remove dangling images and containers
+        run: |
+          docker container prune -f
+          docker image prune -f
+
+  deploy:
+    runs-on: self-hosted
+    needs: cleanup
+    steps:
+      - name: Deploy container in detached mode
+        run: |
+          docker run -d --name deployed_container -p 8080:5000 $IMAGE_NAME:${{ env.VERSION_TAG }}
