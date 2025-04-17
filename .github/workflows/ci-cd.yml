@@ -18,6 +18,7 @@ jobs:
 
       - name: Build Docker image with version tag
         run: |
+          echo "Building Docker image with tag: $IMAGE_NAME:${{ env.VERSION_TAG }}"
           docker build -t $IMAGE_NAME:${{ env.VERSION_TAG }} .
 
   run_test:
