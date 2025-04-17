@@ -2,7 +2,8 @@ name: CI/CD Pipeline Python App
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 env:
   IMAGE_NAME: python-app
