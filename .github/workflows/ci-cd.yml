@@ -16,10 +16,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Show directory contents (debug step)
+        run: |
+          echo "Current Directory: $(pwd)"
+          ls -la
+          echo "Contents of app folder:"
+          ls -la app/
+
       - name: Build Docker image with version tag
         run: |
-          echo "Building Docker image with tag: $IMAGE_NAME:${{ env.VERSION_TAG }}"
           docker build -t $IMAGE_NAME:${{ env.VERSION_TAG }} .
+        working-directory: ${{ github.workspace }}
 
   run_test:
     runs-on: self-hosted
