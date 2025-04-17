@@ -63,4 +63,4 @@ jobs:
     steps:
       - name: Deploy container in detached mode
         run: |
-          docker run -d --name deployed_container -p 8080:5000 $IMAGE_NAME:${{ env.VERSION_TAG }}
+          docker run -d --name deployed_container -p 8000:5000 $IMAGE_NAME:${{ env.VERSION_TAG }}
